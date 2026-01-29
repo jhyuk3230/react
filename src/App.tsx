@@ -1,6 +1,8 @@
 import styles from '@/styles/App.module.css'
 import Login from '@/component/login.tsx'
 import { useEffect } from 'react';
+import Crawling from '@/component/crawling';
+import Calendar from './component/calendar';
 
 function App() {
   useEffect(() => {
@@ -20,7 +22,13 @@ function App() {
           <Login />
         </section>
 
-        <section></section>
+        <section>
+          <Calendar />
+        </section>
+
+        <section>
+          <Crawling />
+        </section>
       </main>
     </>
   )

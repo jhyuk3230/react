@@ -1,9 +1,10 @@
-import styles from '@/styles/login.module.css'
+import styles from '@/styles/login.module.css';
 import SignIn from './signIn';
 import { useAuthStore } from '@/store/authStore';
+import SignUp from './signUp';
 
 export default function Login() {
-    const { isLogin, isLoginPopup, setIsLogin, setIsLoginPopup } = useAuthStore();
+    const { isLogin, isLoginPopup, isSignUpPopup, setIsLogin, setIsLoginPopup } = useAuthStore();
 
     const handleLoginPopup = () => {
         setIsLoginPopup(!isLoginPopup);
@@ -20,6 +21,7 @@ export default function Login() {
             </button>
 
             {isLoginPopup && <SignIn />}
+            {isSignUpPopup && <SignUp />}
         </>
     )
 }

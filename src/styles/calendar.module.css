@@ -1,0 +1,35 @@
+.calendar{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.calendarHeader{
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 20px;
+}
+
+.calendarHeaderInfo{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.today{
+    background: #999;
+}
+
+.sun{
+    color: #ff0000;
+}
+
+.sat{
+    color: #0000ff;
+}
+
+.holiday{
+    color: #ff0000;
+}
