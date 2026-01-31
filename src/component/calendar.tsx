@@ -5,6 +5,7 @@ import styles from '@/styles/calendar.module.css';
 
 interface HolidayType {
     date: string;
+    localName: string;
 }
 
 export default function Calendar() {
@@ -16,9 +17,33 @@ export default function Calendar() {
             try {
                 const response = await axios.get(`https://date.nager.at/api/v3/PublicHolidays/${holidayYear}/KR`);
 
-                console.log(response);
-                console.log(response.data);
-                setHolidays(response.data);
+                const holidayArr = response.data.reduce((arr:any[], data: any) => {
+                    const currentDate = new Date(data.date);
+                    if (currentDate.getDay() === 0) {
+                        // console.log(currentDate)
+                        // console.log(currentDate.getDate())
+                        currentDate.setDate(currentDate.getDate() + 1)
+
+                        const formatChange = format(currentDate, 'yyyy-MM-dd');
+
+                        arr.push({
+                            date: formatChange,
+                            localName: '대체공휴일',
+                            name: 'alternative holiday'
+                        })
+                    }
+
+                    arr.push(data);
+                    return arr
+                }, [])
+
+
+                // console.log(holidayArr);
+
+                // console.log(response);
+                // console.log(response.data);
+                setHolidays(holidayArr);
+                // setHolidays(response.data);
             } catch (error) {
                 console.log(error);
             }
@@ -37,6 +62,9 @@ export default function Calendar() {
     const calendarStart = startOfWeek(monthStart);
     const calendarEnd = endOfWeek(monthEnd);
     const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+    // console.log(holidays);
+    // console.log(calendarDays);
 
 
     const prevMonth = () => {
@@ -72,8 +100,17 @@ export default function Calendar() {
                 {calendarDays.map((day) => {
                     const formatChange = format(day, 'yyyy-MM-dd');
                     const isHoliday = holidays.find(holiday => holiday.date === formatChange);
+                    console.log(isHoliday)
                     return (
-                        <li key={`${day}d`} className={`${day.getDay() === 0 ? styles.sun : ''} ${day.getDay() === 6 ? styles.sat : ''} ${today.getDate() === day.getDate() && today.getMonth() === day.getMonth() && today.getFullYear() === day.getFullYear() ? styles.today : ''} ${isHoliday ? styles.holiday : ''}`}>{day.getMonth() + 1} / {day.getDate()}</li>
+                        // <li key={`${day}d`} className={`${day.getDay() === 0 ? styles.sun : ''} ${day.getDay() === 6 ? styles.sat : ''} ${today.getDate() === day.getDate() && today.getMonth() === day.getMonth() && today.getFullYear() === day.getFullYear() ? styles.today : ''} ${isHoliday ? styles.holiday : ''}`}>{day.getMonth() + 1} / {day.getDate()}</li>
+                        <li key={`${day}d`} className={`${styles.calendarDay}
+                            ${day.getDay() === 0 ? styles.sun : ''}
+                            ${day.getDay() === 6 ? styles.sat : ''}
+                            ${today.getDate() === day.getDate() && today.getMonth() === day.getMonth() && today.getFullYear() === day.getFullYear() ? styles.today : ''} ${isHoliday ? styles.holiday : ''}
+                            `}>
+                                {day.getDate()} <br />
+                                {isHoliday?.localName}
+                            </li>
                     )
                 })}
             </ul>

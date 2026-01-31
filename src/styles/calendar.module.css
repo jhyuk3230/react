@@ -18,6 +18,11 @@
     gap: 10px;
 }
 
+.calendarDay{
+    height: 100px;
+    border: 1px solid #000;
+}
+
 .today{
     background: #999;
 }
