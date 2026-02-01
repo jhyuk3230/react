@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, setDate, startOfMonth, startOfWeek, subMonths } from 'date-fns';
+import { addDays, addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subMonths } from 'date-fns';
 import styles from '@/styles/calendar.module.css';
 
 interface HolidayType {
@@ -15,19 +15,30 @@ export default function Calendar() {
     useEffect(() => {
         const fetchHolidays = async () => {
             try {
+                // const response = await axios.get(`https://date.nager.at/api/v3/PublicHolidays/2027/KR`);
                 const response = await axios.get(`https://date.nager.at/api/v3/PublicHolidays/${holidayYear}/KR`);
+
+                // console.log(response.data)
 
                 const holidayArr = response.data.reduce((arr:any[], data: any) => {
                     const currentDate = new Date(data.date);
-                    if (currentDate.getDay() === 0) {
-                        // console.log(currentDate)
-                        // console.log(currentDate.getDate())
-                        currentDate.setDate(currentDate.getDate() + 1)
 
-                        const formatChange = format(currentDate, 'yyyy-MM-dd');
+                    if (currentDate.getDay() === 0) {
+                        let nextDay = addDays(currentDate, 1);
+                        let nextDayFormatChange = format(nextDay, 'yyyy-MM-dd');
+                        // console.log(nextDayFormatChange);
+
+                        while (response.data.find((item: any) => item.date === nextDayFormatChange)) {
+                            nextDay = addDays(nextDay, 1);
+                            nextDayFormatChange = format(nextDay, 'yyyy-MM-dd');
+                            console.log(nextDayFormatChange);
+                        }
+                        // currentDate.setDate(currentDate.getDate() + 1)
+
+                        // const formatChange = format(currentDate, 'yyyy-MM-dd');
 
                         arr.push({
-                            date: formatChange,
+                            date: nextDayFormatChange,
                             localName: '대체공휴일',
                             name: 'alternative holiday'
                         })
@@ -100,7 +111,7 @@ export default function Calendar() {
                 {calendarDays.map((day) => {
                     const formatChange = format(day, 'yyyy-MM-dd');
                     const isHoliday = holidays.find(holiday => holiday.date === formatChange);
-                    console.log(isHoliday)
+                    // console.log(isHoliday)
                     return (
                         // <li key={`${day}d`} className={`${day.getDay() === 0 ? styles.sun : ''} ${day.getDay() === 6 ? styles.sat : ''} ${today.getDate() === day.getDate() && today.getMonth() === day.getMonth() && today.getFullYear() === day.getFullYear() ? styles.today : ''} ${isHoliday ? styles.holiday : ''}`}>{day.getMonth() + 1} / {day.getDate()}</li>
                         <li key={`${day}d`} className={`${styles.calendarDay}
