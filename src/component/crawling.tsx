@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as Cheerio from "cheerio";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from '@/styles/crawling.module.css';
 
 interface Post {
@@ -9,8 +9,17 @@ interface Post {
     link: string;
 }
 
+interface PostPopup {
+    title: string;
+    writer: string;
+    date: string;
+    data: string;
+}
+
 export default function Crawling() {
     const [post, setPost] = useState<Post[]>([])
+    const [postPopup, setPostPopup] = useState<PostPopup[]>([]);
+    const [postPopupOpen, setPostPopupOpen] = useState(false);
     const handleCrawling = async () => {
         try {
             const response = await axios.get('/api/board/lists/?id=alopecia');
@@ -27,18 +36,59 @@ export default function Crawling() {
                     crawlData.push({
                         title: title,
                         date: date,
-                        link: `https://gall.dcinside.com/${link}`
+                        link: `https://gall.dcinside.com/${link}`,
                     })
                 }
             });
 
             setPost(crawlData);
-
-            console.log(crawlData);
         } catch (error) {
             console.error(error);
         }
     }
+
+    const crawlingPopup = async (url: string) => {
+        const replaceUrl = url.replace("https://gall.dcinside.com/", "");
+        try {
+            const response = await axios.get(`/api${replaceUrl}`);
+            const $ = Cheerio.load(response.data);
+            const postPopupData: PostPopup[] = [];
+
+            $('img').each((index, element) => {
+                $(element).removeAttr('onerror');
+
+                const src = $(element).attr('src') || "";
+                if (src) {
+                    $(element).attr('src', `https://wsrv.nl/?url=${src}`);
+                }
+            });
+
+            $('.view_content_wrap').each((index, element) => {
+                const title = $(element).find('.title_subject').text().trim();
+                const writer = $(element).find('.nickname').text().trim();
+                const date = $(element).find('.gallview_head .gall_date').text().trim();
+                const data = $(element).find('.gallview_contents .write_div').html() || "";
+
+                if (title) {
+                    postPopupData.push({
+                        title: title,
+                        writer: writer,
+                        date: date,
+                        data: data,
+                    })
+                }
+            })
+
+            setPostPopup(postPopupData);
+            setPostPopupOpen(true);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    useEffect(() => {
+        // console.log(postPopup);
+    }, [postPopup]);
     
     return (
         <>
@@ -48,13 +98,27 @@ export default function Crawling() {
             <ul className={styles.postList}>
                 {post.map((content, index) => (
                     <li key={index}>
-                        <a href={content.link} className={styles.postLink}>
+                        <button className={styles.postLink} onClick={() => crawlingPopup(content.link)}>
                             <span>{content.title}</span>
                             <span>{content.date}</span>
-                        </a>
+                        </button>
                     </li>
                 ))}
             </ul>
+            
+            { postPopupOpen ? (
+                <div className={styles.postPopup}>
+                    <button className={styles.postPopupCloseBtn} onClick={() => setPostPopupOpen(false)}>닫기</button>
+                    <div className={styles.postPopupContent}>
+                        <h3>{postPopup[0].title}</h3>
+                        <div className={styles.postPopupInfo}>
+                            <p>{postPopup[0].writer}</p>
+                            <p>{postPopup[0].date}</p>
+                        </div>
+                        <div dangerouslySetInnerHTML={{ __html: postPopup[0].data }}></div>
+                    </div>
+                </div>
+            ) : null }
         </>
     )
 }

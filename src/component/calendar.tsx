@@ -15,10 +15,10 @@ export default function Calendar() {
     useEffect(() => {
         const fetchHolidays = async () => {
             try {
-                // const response = await axios.get(`https://date.nager.at/api/v3/PublicHolidays/2027/KR`);
-                const response = await axios.get(`https://date.nager.at/api/v3/PublicHolidays/${holidayYear}/KR`);
+                const response = await axios.get(`https://dat/e.nager.at/api/v3/PublicHolidays/2027/KR`);
+                // const response = await axios.get(`https://date.nager.at/api/v3/PublicHolidays/${holidayYear}/KR`);
 
-                // console.log(response.data)
+                console.log(response.data)
 
                 const holidayArr = response.data.reduce((arr:any[], data: any) => {
                     const currentDate = new Date(data.date);
@@ -47,9 +47,6 @@ export default function Calendar() {
                     arr.push(data);
                     return arr
                 }, [])
-
-
-                // console.log(holidayArr);
 
                 // console.log(response);
                 // console.log(response.data);
