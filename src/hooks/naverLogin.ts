@@ -6,7 +6,7 @@ export const useNaverLogin = (onLoginSuccess: () => void) => {
 
     const login = () => {
         const state = Math.random().toString(36).substr(2,11);
-        const url = `${NAVER_CONFIG.AUTH_URL}?response_type=code&client_id=${NAVER_CONFIG.CLIENT_ID}&redirect_uri=${encodeURI(NAVER_CONFIG.CALLBACK_URL)}&state=${state}`;
+        const url = `${NAVER_CONFIG.AUTH_URL}?response_type=code&client_id=${NAVER_CONFIG.CLIENT_ID}&client_secret=${NAVER_CONFIG.CLIENT_SECRET}&redirect_uri=${encodeURI(NAVER_CONFIG.CALLBACK_URL)}&state=${state}`;
         popup.current = window.open(url, "naverLogin", "width=500, height=600");
     }
     
