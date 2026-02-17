@@ -1,6 +1,7 @@
 import styles from '@/styles/login.module.css';
 import { useAuthStore } from '@/store/authStore';
 import { useState } from 'react';
+import axios from 'axios';
 
 export default function SignUp() {
     const { isSignUpPopup, setIsSignUpPopup, setIsLoginPopup } = useAuthStore();
@@ -29,20 +30,31 @@ export default function SignUp() {
         contact: false,
     });
 
-    const handleSignUpForm = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSignUpForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!formError.id || !formError.email || !formError.pw || !formError.pwre || !formError.name || !formError.contact) {
+            try {
+                await axios.post('http://localhost:3001/user', {
+                    id: formData.id,
+                    email: formData.email,
+                    pw: formData.pw,
+                    name: formData.name,
+                    contact: formData.contact,
+                });
+            } catch (error) {
+                console.error(error);
+            }
+
             setFormData({
-                id: formData.id,
-                email: formData.email,
-                pw: formData.pw,
-                pwre: formData.pwre,
-                name: formData.name,
-                contact: formData.contact,
+                id: "",
+                email: "",
+                pw: "",
+                pwre: "",
+                name: "",
+                contact: "",
             });
             setIsSignUpPopup(false);
             setIsLoginPopup(true);
-            console.log(formData);
             return;
         }
     }

@@ -1,0 +1,11 @@
+{
+  "user": [
+    {
+      "id": "admin",
+      "email": "admin@test.com",
+      "pw": "admin",
+      "name": "admin",
+      "contact": "010-0000-0000"
+    }
+  ]
+}

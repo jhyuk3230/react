@@ -1,12 +1,15 @@
 import styles from '@/styles/login.module.css'
 import { useState } from 'react'
 import { useNaverLogin } from '@/hooks/naverLogin'
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore } from '@/store/authStore'
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export default function SignIn() {
-    const { isLoginPopup, setIsLogin, setIsLoginPopup, setIsSignUpPopup } = useAuthStore();
+    const { isLoginPopup, setIsLogin, setIsLoginPopup, setIsSignUpPopup, setLoginId } = useAuthStore();
     const [idError, setIdError] = useState(false);
     const [pwError, setPwError] = useState(false);
+    const [loginError, setLoginError] = useState(false);
 
     const handleLoginPopupDim = (e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
@@ -21,25 +24,42 @@ export default function SignIn() {
         setIsLoginPopup(false);
     }
 
-    const handleLoginForm = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleLoginForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const form = e.currentTarget;
         const formData = new FormData(e.target as HTMLFormElement);
+
+        const id = formData.get("id") as string;
+        const pw = formData.get("pw");
 
         setIdError(false);
         setPwError(false);
 
         if (formData.get("id") === "") {
             setIdError(true);
-        } else {
-            if (formData.get("pw") === "") {
-                setPwError(true);
-            } else {
-                handleLogin();
-                form.reset();
-                setIdError(false);
-                setPwError(false);
+            return;
+        }
+
+        if (formData.get("pw") === "") {
+            setPwError(true);
+            return;
+        }
+
+        try {
+            const response = await axios.get(`http://localhost:3001/user?id=${id}&pw=${pw}`);
+            if (response.data.length === 0) {
+                setLoginError(true);
+                return;
             }
+
+            setLoginId(id);
+            Cookies.set("loginId", id);
+            handleLogin();
+            form.reset();
+            setIdError(false);
+            setPwError(false);
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -63,6 +83,7 @@ export default function SignIn() {
                             <input type="text" placeholder="아이디" name="id" />
                             <input type="password" placeholder="비밀번호" name="pw" />
                             {idError || pwError ? <p className={styles.loginError}>{idError ? '아이디를 입력해주세요' : pwError ? '비밀번호를 입력해주세요' : ''}</p> : null}
+                            {loginError ? <p className={styles.loginError}>아이디 또는 비밀번호가 일치하지 않습니다</p> : null}
                             <button className={styles.loginBtn} type="submit">로그인</button>
                         </form>
                         <ul className={styles.loginPopupLink}>

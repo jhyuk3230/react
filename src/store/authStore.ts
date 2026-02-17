@@ -8,12 +8,15 @@ interface AuthState {
     setIsLogin: (value: boolean) => void;
     setIsLoginPopup: (value: boolean) => void;
     setIsSignUpPopup: (value: boolean) => void;
+    loginId: string;
+    setLoginId: (value: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
     isLogin: !!Cookies.get("isLogin"),
     isLoginPopup: false,
     isSignUpPopup: false,
+    loginId: "",
 
     setIsLogin: (value: boolean) => {
         if (value) {
@@ -26,4 +29,5 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     setIsLoginPopup: (value: boolean) => set({isLoginPopup: value}),
     setIsSignUpPopup: (value: boolean) => set({isSignUpPopup: value}),
+    setLoginId: (value: string) => set({loginId: value}),
 }))
