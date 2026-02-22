@@ -18,7 +18,7 @@ export default function Calendar() {
                 // const response = await axios.get(`https://dat/e.nager.at/api/v3/PublicHolidays/2027/KR`);
                 const response = await axios.get(`https://date.nager.at/api/v3/PublicHolidays/${holidayYear}/KR`);
 
-                console.log(response.data)
+                // console.log(response.data)
 
                 const holidayArr = response.data.reduce((arr:any[], data: any) => {
                     const currentDate = new Date(data.date);

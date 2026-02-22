@@ -3,10 +3,10 @@ import { useState } from 'react'
 import { useNaverLogin } from '@/hooks/naverLogin'
 import { useAuthStore } from '@/store/authStore'
 import axios from 'axios';
-import Cookies from 'js-cookie';
+import { NAVER_CONFIG } from '@/config/naver';
 
 export default function SignIn() {
-    const { isLoginPopup, setIsLogin, setIsLoginPopup, setIsSignUpPopup, setLoginId } = useAuthStore();
+    const { isLoginPopup, setIsLogin, setIsLoginPopup, setIsSignUpPopup, setLoginId, setAccessToken, setLoginType } = useAuthStore();
     const [idError, setIdError] = useState(false);
     const [pwError, setPwError] = useState(false);
     const [loginError, setLoginError] = useState(false);
@@ -53,7 +53,7 @@ export default function SignIn() {
             }
 
             setLoginId(id);
-            Cookies.set("loginId", id);
+            setLoginType("local");
             handleLogin();
             form.reset();
             setIdError(false);
@@ -63,9 +63,57 @@ export default function SignIn() {
         }
     }
 
-    const { naverLogin } = useNaverLogin(() => {
-        setIsLogin(true);
-        setIsLoginPopup(false);
+    const { naverLogin } = useNaverLogin(async (code: string) => {
+        try{
+            // console.log(code);
+            const state = Math.random().toString(36).substr(2, 11);
+            const params = new URLSearchParams();
+            params.append("grant_type", "authorization_code");
+            params.append("client_id", NAVER_CONFIG.CLIENT_ID);
+            params.append("client_secret", NAVER_CONFIG.CLIENT_SECRET);
+            params.append("code", code);
+            params.append("state", state);
+            const tokenResponse = await axios.post("/api/naver/oauth2.0/token", params);
+
+            // console.log(tokenResponse);
+
+            const accessToken = tokenResponse.data.access_token;
+            // console.log(accessToken);
+
+            const userResponse = await axios.get("/api/openapi/v1/nid/me", {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+            // console.log(userResponse.data.response);
+
+            const userData = userResponse.data.response;
+
+            try{
+                const response = await axios.get(`http://localhost:3001/user?id=${userData.id}`);
+
+                if (response.data.length === 0) {
+                    await axios.post("http://localhost:3001/user", {
+                        id: userData.id,
+                        email: userData.email,
+                        pw: `${userData.id}${Math.random().toString(36).substr(2, 11)}`,
+                        name: userData.name,
+                        contact: userData.mobile.replaceAll("-", ""),
+                    })
+                }
+
+                setLoginId(userData.id);
+                // Cookies.set("loginId", userData.id);
+                setIsLogin(true);
+                setIsLoginPopup(false);
+                setAccessToken(accessToken);
+                setLoginType("naver");
+            } catch (error) {
+                console.error(error);
+            }
+        } catch (error) {
+            console.error(error);
+        }
     });
 
     const handleSignUp = () => {

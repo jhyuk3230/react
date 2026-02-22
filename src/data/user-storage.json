@@ -5,7 +5,20 @@
       "email": "admin@test.com",
       "pw": "admin",
       "name": "admin",
-      "contact": "010-0000-0000"
+      "contact": "01000000000"
+    },
+    {
+      "id": "test",
+      "email": "test@test.com",
+      "pw": "!!test111",
+      "name": "test",
+      "contact": "01000000000"
+    },
+    {
+      "id": "JW12mmREW9IHlyB7lCKVVPPJo2P-uKpTkLM_w8eVi_I",
+      "pw": "JW12mmREW9IHlyB7lCKVVPPJo2P-uKpTkLM_w8eVi_Im9nu9kdnb6o",
+      "name": "이재혁",
+      "contact": "01040313230"
     }
   ]
 }

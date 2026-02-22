@@ -12,6 +12,18 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      '/api/naver': {
+        target: 'https://nid.naver.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/naver/, ''),
+        secure: false,
+      },
+      '/api/openapi': {
+        target: 'https://openapi.naver.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/openapi/, ''),
+        secure: false
+      },
       '/api': {
         target: 'https://gall.dcinside.com',
         changeOrigin: true,
