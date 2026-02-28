@@ -16,9 +16,17 @@
     },
     {
       "id": "JW12mmREW9IHlyB7lCKVVPPJo2P-uKpTkLM_w8eVi_I",
-      "pw": "JW12mmREW9IHlyB7lCKVVPPJo2P-uKpTkLM_w8eVi_Im9nu9kdnb6o",
+      "email": "jhyuk3230@naver.com",
+      "pw": "JW12mmREW9IHlyB7lCKVVPPJo2P-uKpTkLM_w8eVi_I2u870c5yt7p",
       "name": "이재혁",
       "contact": "01040313230"
+    },
+    {
+      "id": "4765793721",
+      "email": "jhyuk3230@kakao.com",
+      "pw": "4765793721xwnbljd3lc8",
+      "name": "altbit",
+      "contact": "01000000000"
     }
   ]
 }

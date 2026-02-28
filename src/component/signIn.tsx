@@ -1,9 +1,9 @@
 import styles from '@/styles/login.module.css'
 import { useState } from 'react'
-import { useNaverLogin } from '@/hooks/naverLogin'
+import { useSnsLogin } from '@/hooks/snsLogin'
 import { useAuthStore } from '@/store/authStore'
 import axios from 'axios';
-import { NAVER_CONFIG } from '@/config/naver';
+import { KAKAO_CONFIG, NAVER_CONFIG } from '@/config/sns';
 
 export default function SignIn() {
     const { isLoginPopup, setIsLogin, setIsLoginPopup, setIsSignUpPopup, setLoginId, setAccessToken, setLoginType } = useAuthStore();
@@ -63,56 +63,132 @@ export default function SignIn() {
         }
     }
 
-    const { naverLogin } = useNaverLogin(async (code: string) => {
+    // 콜백
+    const { snsLogin } = useSnsLogin(async (code: string, provider: string) => {
         try{
-            // console.log(code);
-            const state = Math.random().toString(36).substr(2, 11);
-            const params = new URLSearchParams();
-            params.append("grant_type", "authorization_code");
-            params.append("client_id", NAVER_CONFIG.CLIENT_ID);
-            params.append("client_secret", NAVER_CONFIG.CLIENT_SECRET);
-            params.append("code", code);
-            params.append("state", state);
-            const tokenResponse = await axios.post("/api/naver/oauth2.0/token", params);
+            if (provider === "naver") {
+                // console.log(code);
+                const state = Math.random().toString(36).substr(2, 11);
+                const params = new URLSearchParams();
+                params.append("grant_type", "authorization_code");
+                params.append("client_id", NAVER_CONFIG.CLIENT_ID);
+                params.append("client_secret", NAVER_CONFIG.CLIENT_SECRET);
+                params.append("code", code);
+                params.append("state", state);
+                const tokenResponse = await axios.post("/api/naver/oauth2.0/token", params);
 
-            // console.log(tokenResponse);
+                // console.log(tokenResponse);
 
-            const accessToken = tokenResponse.data.access_token;
-            // console.log(accessToken);
+                const accessToken = tokenResponse.data.access_token;
+                // console.log(accessToken);
 
-            const userResponse = await axios.get("/api/openapi/v1/nid/me", {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
+                const userResponse = await axios.get("/api/openapi/v1/nid/me", {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                })
+                // console.log(userResponse.data.response);
+
+                const userData = userResponse.data.response;
+
+                try {
+                    const response = await axios.get(`http://localhost:3001/user?id=${userData.id}`);
+
+                    if (response.data.length === 0) {
+                        await axios.post("http://localhost:3001/user", {
+                            id: userData.id,
+                            email: userData.email,
+                            pw: `${userData.id}${Math.random().toString(36).substr(2, 11)}`,
+                            name: userData.name,
+                            contact: userData.mobile.replaceAll("-", ""),
+                        })
+                    }
+
+                    setLoginId(userData.id);
+                    // Cookies.set("loginId", userData.id);
+                    setIsLogin(true);
+                    setIsLoginPopup(false);
+                    setAccessToken(accessToken);
+                    setLoginType("naver");
+                } catch (error) {
+                    console.error(error);
                 }
-            })
-            // console.log(userResponse.data.response);
+            }
 
-            const userData = userResponse.data.response;
+            if (provider === "kakao") {
+                const params = new URLSearchParams();
+                params.append("grant_type", "authorization_code");
+                params.append("client_id", KAKAO_CONFIG.REST_API_KEY);
+                params.append("redirect_uri", KAKAO_CONFIG.REDIRECT_URI);
+                params.append("client_secret", KAKAO_CONFIG.CLIENT_SECRET);
+                params.append("code", code);
 
-            try{
-                const response = await axios.get(`http://localhost:3001/user?id=${userData.id}`);
+                // console.log(params.toStrizng());
+                const tokenResponse = await axios.post("api/kakao/oauth/token", params);
+                
+                const accessToken = tokenResponse.data.access_token;
+                // console.log(accessToken);
 
-                if (response.data.length === 0) {
-                    await axios.post("http://localhost:3001/user", {
-                        id: userData.id,
-                        email: userData.email,
-                        pw: `${userData.id}${Math.random().toString(36).substr(2, 11)}`,
-                        name: userData.name,
-                        contact: userData.mobile.replaceAll("-", ""),
-                    })
+                const userResponse = await axios.get("/api/kapi/v2/user/me", {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+                    }
+                })
+                // console.log(userResponse.data.kakao_account);
+
+                const userData = userResponse.data;
+
+                try {
+                    // console.log(userData.id);
+                    const id = userData.id.toString();
+                    const response = await axios.get(`http://localhost:3001/user/${id}`);
+
+                    if (response.status !== 404) {
+                        setLoginId(id);
+                        setIsLogin(true);
+                        setIsLoginPopup(false);
+                        setAccessToken(accessToken);
+                        setLoginType("kakao");
+                    }
+
+                    // if (response.data.id !== id) {
+                    //     await axios.post("http://localhost:3001/user", {
+                    //         id: id,
+                    //         email: userData.kakao_account.email,
+                    //         pw: `${userData.id}${Math.random().toString(36).substr(2, 11)}`,
+                    //         name: userData.kakao_account.profile.nickname,
+                    //         contact: "01000000000",
+                    //     })
+                    // }
+
+                    // setLoginId(id);
+                    // setIsLogin(true);
+                    // setIsLoginPopup(false);
+                    // setAccessToken(accessToken);
+                    // setLoginType("kakao");
+                } catch (e: any) {
+                    if (e.response.status === 404) {
+                        const id = userData.id.toString();
+
+                        await axios.post("http://localhost:3001/user", {
+                            id: id,
+                            email: userData.kakao_account.email,
+                            pw: `${userData.id}${Math.random().toString(36).substr(2, 11)}`,
+                            name: userData.kakao_account.profile.nickname,
+                            contact: "01000000000",
+                        });
+
+                        setLoginId(userData.id);
+                        setIsLogin(true);
+                        setIsLoginPopup(false);
+                        setAccessToken(accessToken);
+                        setLoginType("kakao");
+                    }
                 }
-
-                setLoginId(userData.id);
-                // Cookies.set("loginId", userData.id);
-                setIsLogin(true);
-                setIsLoginPopup(false);
-                setAccessToken(accessToken);
-                setLoginType("naver");
-            } catch (error) {
-                console.error(error);
             }
         } catch (error) {
-            console.error(error);
+            // console.error(error);
         }
     });
 
@@ -147,16 +223,10 @@ export default function SignIn() {
                         </ul>
                         <ul className={styles.snsLoginList}>
                             <li>
-                                <button className={styles.snsLoginBtn} onClick={naverLogin}>네이버</button>
+                                <button className={styles.snsLoginBtn} onClick={() => snsLogin("naver")}>네이버</button>
                             </li>
                             <li>
-                                <button className={styles.snsLoginBtn} onClick={naverLogin}>네이버</button>
-                            </li>
-                            <li>
-                                <button className={styles.snsLoginBtn} onClick={naverLogin}>네이버</button>
-                            </li>
-                            <li>
-                                <button className={styles.snsLoginBtn} onClick={naverLogin}>네이버</button>
+                                <button className={styles.snsLoginBtn} onClick={() => snsLogin("kakao")}>카카오</button>
                             </li>
                         </ul>
                     </div>

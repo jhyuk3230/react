@@ -5,7 +5,7 @@ import SignUp from './signUp';
 import axios from 'axios';
 import { useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { NAVER_CONFIG } from '@/config/naver'
+import { NAVER_CONFIG } from '@/config/sns'
 
 export default function Login() {
     const { isLogin, isLoginPopup, isSignUpPopup, loginId, loginType, setIsLogin, setIsLoginPopup, setLoginId, setAccessToken, setLoginType } = useAuthStore();
@@ -34,6 +34,16 @@ export default function Login() {
 
                 await axios.post("/api/naver/oauth2.0/token", params);
             }
+
+            if (loginType === "kakao") {
+                const accessToken = Cookies.get("accessToken") as string;
+                const params = new URLSearchParams();
+                params.append("access_token", accessToken);
+                params.append("admin_key", "0cb4ed462a79e5020bd6f2cb116d248f")
+
+                await axios.post("/api/kapi/v1/user/unlink", params);
+            }
+
             const id = loginId;
             await axios.delete(`http://localhost:3001/user/${id}`);
             handleLogout();

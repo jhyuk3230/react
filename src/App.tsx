@@ -2,7 +2,8 @@ import styles from '@/styles/App.module.css'
 import Login from '@/component/login.tsx'
 import { useEffect } from 'react';
 import Crawling from '@/component/crawling';
-import Calendar from './component/calendar';
+import Calendar from '@/component/calendar';
+import Contact from '@/component/contact';
 
 function App() {
   useEffect(() => {
@@ -11,7 +12,7 @@ function App() {
       const code = urlParams.get("code");
 
       if (code) {
-        window.opener.postMessage({ type: 'NAVER_LOGIN', code }, window.location.origin);
+        window.opener.postMessage({ type: 'SNS_LOGIN', code, provider: localStorage.getItem("login_provider") }, window.location.origin);
       }
     }
   }, [])
@@ -28,6 +29,10 @@ function App() {
 
         <section>
           <Crawling />
+        </section>
+
+        <section>
+          <Contact />
         </section>
       </main>
     </>

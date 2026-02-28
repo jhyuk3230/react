@@ -24,6 +24,18 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/openapi/, ''),
         secure: false
       },
+      '/api/kakao': {
+        target: 'https://kauth.kakao.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/kakao/, ''),
+        secure: false,
+      },
+      '/api/kapi': {
+        target: 'https://kapi.kakao.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/kapi/, ''),
+        secure: false,
+      },
       '/api': {
         target: 'https://gall.dcinside.com',
         changeOrigin: true,

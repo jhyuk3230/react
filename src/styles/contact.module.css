@@ -1,0 +1,30 @@
+.contactForm{
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.contactForm input, textarea{
+    height: 30px;
+    border: 1px solid #999;
+}
+
+.contactForm .title{
+    grid-column: 1 / span 2;
+}
+
+.contactForm textarea{
+    height: 100px;
+    grid-column: 1 / span 2;
+    resize: none;
+}
+
+.contactForm button{
+    height: 30px;
+    border: none;
+    grid-column: 1 / span 2;
+    background-color: #ff0000;
+    color: #fff;
+    cursor: pointer;
+}
