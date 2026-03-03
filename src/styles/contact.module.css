@@ -7,11 +7,42 @@
 
 .contactForm input, textarea{
     height: 30px;
+    padding: 5px;
     border: 1px solid #999;
 }
 
-.contactForm .title{
+/* .contactForm .title{
     grid-column: 1 / span 2;
+} */
+
+.contactForm .fileContainer{
+    height: 30px;
+    padding: 5px;
+    border: 1px solid #999;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-flow: wrap;
+}
+
+.contactForm .file{
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+    line-height: 20px;
+    cursor: pointer;
+}
+
+.contactForm .fileName{
+    max-width: 80%;
+    padding-left: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #000;
+    line-height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .contactForm textarea{
